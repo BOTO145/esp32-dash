@@ -8,7 +8,7 @@ const char* ssid = "YOUR_WIFI_SSID";
 const char* password = "YOUR_WIFI_PASSWORD";
 
 // WebSocket server details (Replace with your Render.com WebSocket URL)
-const char* websocket_server = "wss://your-app-name.onrender.com/esp32";
+const char* websocket_server = "wss://esp32-dash-ws.onrender.com/esp32";
 
 // Device configuration
 const char* deviceId = "ESP32_001";

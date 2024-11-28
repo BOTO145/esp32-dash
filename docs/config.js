@@ -1,5 +1,5 @@
 // Configuration
 const CONFIG = {
-    // Replace with your Render.com WebSocket URL
-    WEBSOCKET_URL: 'wss://your-app-name.onrender.com'
+    // Replace with your actual Render.com WebSocket URL
+    WEBSOCKET_URL: 'wss://esp32-dash-ws.onrender.com'
 };
