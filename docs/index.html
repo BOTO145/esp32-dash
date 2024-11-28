@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ESP32 Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container-fluid">
+        <nav class="navbar navbar-dark bg-dark">
+            <div class="container-fluid">
+                <span class="navbar-brand mb-0 h1">ESP32 Dashboard</span>
+                <div id="connection-status" class="text-light">Status: Disconnected</div>
+            </div>
+        </nav>
+
+        <div class="row mt-3">
+            <!-- Device List -->
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-header">
+                        Connected Devices
+                    </div>
+                    <div class="card-body">
+                        <ul id="device-list" class="list-group">
+                            <!-- Devices will be added here dynamically -->
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-md-9">
+                <!-- Control Buttons -->
+                <div class="card mb-3">
+                    <div class="card-header">
+                        Controls
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col">
+                                <button class="btn btn-primary" onclick="sendCommand('LED_ON')">LED ON</button>
+                                <button class="btn btn-secondary" onclick="sendCommand('LED_OFF')">LED OFF</button>
+                                <button class="btn btn-info" onclick="sendCommand('GET_DATA')">Request Data</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chart -->
+                <div class="card mb-3">
+                    <div class="card-header">
+                        Real-time Data Chart
+                    </div>
+                    <div class="card-body">
+                        <canvas id="dataChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Data Table -->
+                <div class="card">
+                    <div class="card-header">
+                        Data Table
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Timestamp</th>
+                                        <th>Device ID</th>
+                                        <th>Sensor</th>
+                                        <th>Value</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="data-table">
+                                    <!-- Data rows will be added here dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="config.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

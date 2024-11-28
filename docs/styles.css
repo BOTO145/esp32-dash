@@ -1,0 +1,60 @@
+body {
+    background-color: #f8f9fa;
+}
+
+.card {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 1rem;
+}
+
+.card-header {
+    background-color: #f8f9fa;
+    font-weight: bold;
+}
+
+#connection-status {
+    font-size: 0.9rem;
+}
+
+#connection-status.connected {
+    color: #28a745 !important;
+}
+
+#connection-status.disconnected {
+    color: #dc3545 !important;
+}
+
+.device-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.device-item .status-indicator {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-left: 10px;
+}
+
+.status-indicator.online {
+    background-color: #28a745;
+}
+
+.status-indicator.offline {
+    background-color: #dc3545;
+}
+
+.btn {
+    margin-right: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.table-responsive {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+#dataChart {
+    min-height: 300px;
+}
