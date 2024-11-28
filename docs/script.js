@@ -1,14 +1,10 @@
 // WebSocket connection
 let ws = null;
 const devices = new Map();
-let chart = null;
-let reconnectAttempts = 0;
-const maxReconnectAttempts = 5;
 
 // Initialize the dashboard
 function initDashboard() {
     setupWebSocket();
-    initChart();
     setupEventListeners();
 }
 
@@ -22,7 +18,6 @@ function setupWebSocket() {
     
     ws.onopen = () => {
         updateConnectionStatus(true);
-        reconnectAttempts = 0;
         // Request current device list
         sendMessage({
             command: 'getDevices'
@@ -31,12 +26,8 @@ function setupWebSocket() {
 
     ws.onclose = () => {
         updateConnectionStatus(false);
-        // Attempt to reconnect with exponential backoff
-        if (reconnectAttempts < maxReconnectAttempts) {
-            const timeout = Math.min(1000 * Math.pow(2, reconnectAttempts), 10000);
-            reconnectAttempts++;
-            setTimeout(setupWebSocket, timeout);
-        }
+        // Attempt to reconnect after 5 seconds
+        setTimeout(setupWebSocket, 5000);
     };
 
     ws.onerror = (error) => {
@@ -56,38 +47,6 @@ function updateConnectionStatus(connected) {
     statusElement.className = connected ? 'text-light connected' : 'text-light disconnected';
 }
 
-// Initialize Chart.js
-function initChart() {
-    const ctx = document.getElementById('dataChart').getContext('2d');
-    chart = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: [],
-            datasets: []
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                x: {
-                    type: 'time',
-                    time: {
-                        unit: 'second'
-                    }
-                },
-                y: {
-                    beginAtZero: true
-                }
-            },
-            plugins: {
-                legend: {
-                    position: 'top',
-                }
-            }
-        }
-    });
-}
-
 // Handle incoming data
 function handleIncomingData(data) {
     try {
@@ -101,11 +60,10 @@ function handleIncomingData(data) {
             // Update device list
             updateDevice(parsedData.deviceId);
             
-            // Update data table
-            addDataToTable(parsedData);
-            
-            // Update chart
-            updateChart(parsedData);
+            // Handle button press
+            if (parsedData.sensor === 'button' && parsedData.value === 'pressed') {
+                addButtonPressToTable(parsedData);
+            }
         }
         
     } catch (error) {
@@ -144,39 +102,24 @@ function removeDevice(deviceId) {
     devices.delete(deviceId);
 }
 
-// Update full device list
-function updateDeviceList(devicesList) {
-    const deviceList = document.getElementById('device-list');
-    deviceList.innerHTML = '';
-    
-    devicesList.forEach(device => {
-        devices.set(device.id, {
-            lastSeen: new Date(device.lastSeen),
-            online: true
-        });
-        
-        const deviceElement = document.createElement('li');
-        deviceElement.className = 'list-group-item device-item';
-        deviceElement.id = `device-${device.id}`;
-        deviceElement.innerHTML = `
-            ESP32 ${device.id}
-            <span class="status-indicator online"></span>
-        `;
-        deviceList.appendChild(deviceElement);
-    });
-}
-
-// Add data to table
-function addDataToTable(data) {
+// Add button press to table with timestamp
+function addButtonPressToTable(data) {
     const tbody = document.getElementById('data-table');
     const row = document.createElement('tr');
     
+    const timestamp = new Date(parseInt(data.timestamp));
+    
     row.innerHTML = `
-        <td>${new Date(data.timestamp).toLocaleString()}</td>
+        <td>${timestamp.toLocaleString()}</td>
         <td>${data.deviceId}</td>
         <td>${data.sensor}</td>
-        <td>${data.value}</td>
+        <td><strong>Button Pressed!</strong></td>
     `;
+    
+    row.style.backgroundColor = '#e6ffe6';  // Light green background
+    setTimeout(() => {
+        row.style.backgroundColor = '';  // Remove background after 2 seconds
+    }, 2000);
     
     tbody.insertBefore(row, tbody.firstChild);
     
@@ -186,68 +129,11 @@ function addDataToTable(data) {
     }
 }
 
-// Update chart with new data
-function updateChart(data) {
-    const datasetLabel = `${data.deviceId}-${data.sensor}`;
-    let dataset = chart.data.datasets.find(ds => ds.label === datasetLabel);
-    
-    if (!dataset) {
-        dataset = {
-            label: datasetLabel,
-            data: [],
-            borderColor: getRandomColor(),
-            fill: false,
-            tension: 0.4
-        };
-        chart.data.datasets.push(dataset);
-    }
-    
-    dataset.data.push({
-        x: data.timestamp,
-        y: data.value
-    });
-    
-    // Limit data points
-    if (dataset.data.length > 50) {
-        dataset.data.shift();
-    }
-    
-    chart.update('none');
-}
-
-// Send command to ESP32
-function sendCommand(command, deviceId = null) {
-    if (ws && ws.readyState === WebSocket.OPEN) {
-        const message = {
-            command: command,
-            timestamp: Date.now()
-        };
-        
-        if (deviceId) {
-            message.deviceId = deviceId;
-        }
-        
-        sendMessage(message);
-    } else {
-        console.error('WebSocket is not connected');
-    }
-}
-
 // Send message through WebSocket
 function sendMessage(message) {
     if (ws && ws.readyState === WebSocket.OPEN) {
         ws.send(JSON.stringify(message));
     }
-}
-
-// Generate random color for chart lines
-function getRandomColor() {
-    const letters = '0123456789ABCDEF';
-    let color = '#';
-    for (let i = 0; i < 6; i++) {
-        color += letters[Math.floor(Math.random() * 16)];
-    }
-    return color;
 }
 
 // Check device online status periodically
